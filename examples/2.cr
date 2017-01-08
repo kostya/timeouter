@@ -1,8 +1,5 @@
 require "../src/timeouter"
 
-Timeouter.precision = 0.5.seconds # set precision, 1 second by default
-
-# receive from single channel with timeout
 channel = Channel(Int32).new
 after = Timeouter.after(1.0.seconds)
 
@@ -15,14 +12,18 @@ t = Time.now
 
 select
 when result = channel.receive
-  # Cancel timeouter (it also would be cancel automatically, but this remove it fast from scheduler)
+# Cancel timeouter manyally
+#   it also would be cancel automatically
+#   but this is remove it fast from scheduler
+#   which allow less cpu usage
   after.close
+
   p result
 when after.receive
-  channel.close
   p :timeouted
 end
 
 p Time.now - t
 
 # => :timeouted
+# => 1.000

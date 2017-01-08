@@ -1,11 +1,17 @@
 require "../src/timeouter"
 
-Timeouter.precision = 0.1.seconds
+ch1 = Channel(Int32).new
+ch2 = Channel(Int32).new
 
-ch = Channel(Int32).new
+spawn do
+  sleep 2.0
+  ch1.send(1)
+end
 
-spawn { loop { sleep 1.0; ch.send(rand(1000)) } }
+spawn do
+  sleep 0.5
+  ch2.send(2)
+end
 
-p Timeouter.receive_with_timeout(ch, 0.5.seconds) # => nil
-
-p Timeouter.receive_with_timeout(ch, 1.5.seconds) # => 1562
+p Timeouter.receive_with_timeout(ch1, 1.seconds) # => nil
+p Timeouter.receive_with_timeout(ch2, 1.seconds) # => 2

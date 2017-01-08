@@ -17,9 +17,39 @@ dependencies:
 ```crystal
 require "timeouter"
 
-Timeouter.precision = 0.5.seconds # set precision, 1 second by default
+# set precision, 1 second by default
+Timeouter.precision = 0.5.seconds
 
-# receive from single channel with timeout
+# spend 1.5.second
+Timeouter.after(1.5.seconds).receive
+```
+
+## Helper from receive from Channel with timeout
+
+```crystal
+require "timeouter"
+
+ch1 = Channel(Int32).new
+ch2 = Channel(Int32).new
+
+spawn do
+  sleep 2.0
+  ch1.send(1)
+end
+
+spawn do
+  sleep 0.5
+  ch2.send(2)
+end
+
+p Timeouter.receive_with_timeout(ch1, 1.seconds) # => nil
+p Timeouter.receive_with_timeout(ch2, 1.seconds) # => 2
+```
+
+## Receive from channel with timeout manually
+```crystal
+require "timeouter"
+
 channel = Channel(Int32).new
 after = Timeouter.after(1.0.seconds)
 
@@ -32,31 +62,19 @@ t = Time.now
 
 select
 when result = channel.receive
-  # Cancel timeouter (it also would be cancel automatically, but this remove it fast from scheduler)
+# Cancel timeouter manyally
+#   it also would be cancel automatically
+#   but this is remove it fast from scheduler
+#   which allow less cpu usage
   after.close
+
   p result
 when after.receive
-  channel.close
   p :timeouted
 end
 
 p Time.now - t
 
 # => :timeouted
-```
-
-## Helper receive_with_timeout
-
-```crystal
-require "timeouter"
-
-Timeouter.precision = 0.1.seconds
-
-ch = Channel(Int32).new
-
-spawn { loop { sleep 1.0; ch.send(rand(1000)) } }
-
-p Timeouter.receive_with_timeout(ch, 0.5.seconds) # => nil
-
-p Timeouter.receive_with_timeout(ch, 1.5.seconds) # => 1562
+# => 1.000
 ```
