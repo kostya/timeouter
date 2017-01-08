@@ -24,7 +24,7 @@ Timeouter.precision = 0.5.seconds
 Timeouter.after(1.5.seconds).receive
 ```
 
-## Helper from receive from Channel with timeout
+## Helper: receive from Channel with timeout
 
 ```crystal
 require "timeouter"
