@@ -128,9 +128,11 @@ module Timeouter
     timeouter_channel = after(span)
     select
     when val = ch.receive
+      p 11
       timeouter_channel.close
       val
     when timeouter_channel.receive
+      p 12
       return nil
     end
   end
@@ -139,9 +141,11 @@ module Timeouter
     timeouter_channel = after(span)
     select
     when ch.send(value)
+      p 1
       timeouter_channel.close
       true
     when timeouter_channel.receive
+      p 2
       return nil
     end
   end

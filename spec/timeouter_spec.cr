@@ -218,4 +218,31 @@ describe Timeouter do
       v.should eq 11
     end
   end
+
+  it "complex test" do
+    ch = Channel(Int32).new
+
+    spawn do
+      loop do
+        10.times do |i|
+          Timeouter.send_with_timeout(ch, i, 1.second)
+        end
+      end
+    end
+
+    res = [] of Int32
+
+    5.times do
+      spawn do
+        val = Timeouter.receive_with_timeout(ch, 1.second)
+        res << val if val
+      end
+    end
+
+    sleep 0.1
+    Timeouter.count.should eq 6
+
+    sleep 5
+    res.sort.should eq (0...10).to_a
+  end
 end
