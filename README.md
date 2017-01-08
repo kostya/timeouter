@@ -1,6 +1,6 @@
 # Timeouter
 
-Simple timeouter for crystal lang. Used one coroutine which triggered with precision interval. Also it avoid crystal memory leak with many coroutines: https://github.com/crystal-lang/crystal/issues/3333
+Simple timeouter for crystal lang. Uses one coroutine, which triggered with precision interval. Also it avoid crystal memory leak with many coroutines: https://github.com/crystal-lang/crystal/issues/3333
 
 ## Installation
 
