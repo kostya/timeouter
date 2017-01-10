@@ -60,6 +60,7 @@ module Timeouter
   end
 
   def self.free_expired_tasks
+    return if @@count == 0
     now = Time.now
     self.each do |node|
       if node.closed?
@@ -131,7 +132,7 @@ module Timeouter
       timeouter_channel.close
       val
     when timeouter_channel.receive
-      return nil
+      nil
     end
   end
 
@@ -142,7 +143,7 @@ module Timeouter
       timeouter_channel.close
       true
     when timeouter_channel.receive
-      return nil
+      nil
     end
   end
 end
