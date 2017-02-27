@@ -1,4 +1,6 @@
 module Timeouter
+  VERSION = "0.1"
+
   # Simple linked list
   class Node
     property right : Node?
