@@ -1,5 +1,5 @@
 module Timeouter
-  VERSION = "0.1"
+  VERSION = "0.2"
 
   # Simple linked list
   class Node
