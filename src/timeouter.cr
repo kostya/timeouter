@@ -8,20 +8,20 @@ module Timeouter
 
     @expire_at : Time
 
-    getter channel : Channel::Buffered(Bool)
+    getter channel : Channel(Bool)
     getter added_at
 
     def initialize(interval : Time::Span)
-      @added_at = Time.now
+      @added_at = Time.local
       @expire_at = @added_at + interval
-      @channel = Channel::Buffered(Bool).new(1)
+      @channel = Channel(Bool).new(1)
     end
 
     def closed?
       @channel.closed?
     end
 
-    def expired?(now = Time.now)
+    def expired?(now = Time.local)
       now > @expire_at
     end
 
@@ -32,6 +32,8 @@ module Timeouter
       @channel.close
     end
   end
+
+  extend ::Enumerable(Node)
 
   @@root : Node = Node.new(-1.0.seconds)
   @@runned = false
@@ -50,6 +52,12 @@ module Timeouter
     @@count
   end
 
+  def self.clear
+    @@count = 0
+    @@root.left = nil
+    @@root.right = nil
+  end
+
   def self.background_run
     return if @@runned
     @@runned = true
@@ -63,7 +71,7 @@ module Timeouter
 
   def self.free_expired_tasks
     return if @@count == 0
-    now = Time.now
+    now = Time.local
     self.each do |node|
       if node.closed?
         del(node)
@@ -113,7 +121,7 @@ module Timeouter
       min_at = node.added_at if !min_at || (node.added_at < min_at)
     end
     oldest_wait_interval = if min_at
-                             (Time.now - min_at).to_f
+                             (Time.local - min_at).to_f
                            end
     {tasks: @@count, oldest: oldest_wait_interval}
   end

@@ -30,7 +30,7 @@ describe Timeouter do
 
     should_spend(0.5) do
       x = nil
-      t = Time.now
+      t = Time.local
       select
       when y = ch1.receive
         ch1.close
@@ -57,7 +57,7 @@ describe Timeouter do
 
     should_spend(0.3) do
       x = nil
-      t = Time.now
+      t = Time.local
       select
       when y = ch1.receive
         ch2.close
@@ -82,7 +82,7 @@ describe Timeouter do
 
     should_spend(0.5) do
       x = nil
-      t = Time.now
+      t = Time.local
       select
       when y = ch1.receive
         ch1.close
@@ -107,7 +107,7 @@ describe Timeouter do
 
     should_spend(0.3) do
       x = nil
-      t = Time.now
+      t = Time.local
       select
       when y = ch1.receive
         ch1.close
@@ -132,15 +132,17 @@ describe Timeouter do
 
     c = [] of Int32
     should_spend(0.7) do
-      3.times do
+      loop do
         select
-        when ch1.receive
+        when v = ch1.receive
           c << 1
-        when ch2.receive
+        when v = ch2.receive
           c << 2
-        when ch3.receive
+        when v = ch3.receive
           c << 3
         end
+
+        break if c.size >= 3
       end
     end
     c.should eq [2, 1, 3]
@@ -150,20 +152,15 @@ describe Timeouter do
 
   it "1000 tasks" do
     1000.times do
-      Timeouter.after(0.1.seconds)
+      Timeouter.after(0.2.seconds)
     end
 
-    c = 0
-    Timeouter.each { |node| c += 1 }
-    c.should eq 1000
-
+    Timeouter.to_a.size.should eq 1000
     Timeouter.stats[:tasks].should eq 1000
 
-    sleep 0.2
+    sleep 0.3
 
-    c = 0
-    Timeouter.each { |node| c += 1 }
-    c.should eq 0
+    Timeouter.to_a.size.should eq 0
   end
 
   context "with" do
