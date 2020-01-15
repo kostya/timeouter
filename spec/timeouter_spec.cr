@@ -130,21 +130,35 @@ describe Timeouter do
     ch2 = Timeouter.after(0.3.seconds)
     ch3 = Timeouter.after(0.7.seconds)
 
-    c = [] of Int32
-    should_spend(0.7) do
-      loop do
-        select
-        when v = ch1.receive
-          c << 1
-        when v = ch2.receive
-          c << 2
-        when v = ch3.receive
-          c << 3
-        end
+    res = Channel(Int32).new
 
-        break if c.size >= 3
+    spawn do
+      select
+      when ch1.receive
+        res.send 1
       end
     end
+
+    spawn do
+      select
+      when ch2.receive
+        res.send 2
+      end
+    end
+
+    spawn do
+      select
+      when ch3.receive
+        res.send 3
+      end
+    end
+
+    c = [] of Int32
+
+    should_spend(0.7) do
+      3.times { c << res.receive }
+    end
+
     c.should eq [2, 1, 3]
 
     Timeouter.count.should eq 0

@@ -1,5 +1,5 @@
 module Timeouter
-  VERSION = "0.2"
+  VERSION = "0.3"
 
   # Simple linked list
   class Node
@@ -21,6 +21,10 @@ module Timeouter
       @channel.closed?
     end
 
+    def close!
+      @channel.close rescue nil
+    end
+
     def expired?(now = Time.local)
       now > @expire_at
     end
@@ -29,7 +33,7 @@ module Timeouter
       @channel.send(true)
     rescue Channel::ClosedError
     ensure
-      @channel.close
+      close!
     end
   end
 
@@ -128,31 +132,35 @@ module Timeouter
 
   # User methods
 
-  def self.after(span : Time::Span)
+  def self.after_node(span : Time::Span)
     node = Node.new(span)
     add(node)
     background_run
-    node.channel
+    node
+  end
+
+  def self.after(span : Time::Span)
+    after_node(span).channel
   end
 
   def self.receive_with_timeout(ch, span : Time::Span)
-    timeouter_channel = after(span)
+    timeouter_node = after_node(span)
     select
     when val = ch.receive
-      timeouter_channel.close
+      timeouter_node.close!
       val
-    when timeouter_channel.receive
+    when timeouter_node.channel.receive
       nil
     end
   end
 
   def self.send_with_timeout(ch, value, span : Time::Span)
-    timeouter_channel = after(span)
+    timeouter_node = after_node(span)
     select
     when ch.send(value)
-      timeouter_channel.close
+      timeouter_node.close!
       true
-    when timeouter_channel.receive
+    when timeouter_node.channel.receive
       nil
     end
   end
