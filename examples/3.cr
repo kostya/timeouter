@@ -12,10 +12,10 @@ t = Time.now
 
 select
 when result = channel.receive
-# Cancel timeouter manyally
-#   it also would be cancel automatically
-#   but this is remove it fast from scheduler
-#   which allow less cpu usage
+  # Cancel timeouter manyally
+  #   it also would be cancel automatically
+  #   but this is remove it fast from scheduler
+  #   which allow less cpu usage
   after.close
 
   p result

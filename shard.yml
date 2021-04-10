@@ -1,9 +1,9 @@
 name: timeouter
-version: 0.3
+version: 0.4
 
 authors:
   - Konstantin Makarchev <kostya27@gmail.com>
 
-crystal: 0.20.3
+crystal: ">= 0.20.3"
 
 license: MIT
